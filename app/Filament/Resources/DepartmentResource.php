@@ -19,6 +19,11 @@ class DepartmentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -32,8 +37,11 @@ class DepartmentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(Department::query()->withCount('employees'))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('부서명')
+                    ->formatStateUsing(fn (string $state, Department $record) => "{$state} ({$record->employees_count})")
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
