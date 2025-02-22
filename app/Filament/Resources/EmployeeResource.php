@@ -19,7 +19,7 @@ class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $modelLabel = 'Employee';
 
@@ -35,6 +35,10 @@ class EmployeeResource extends Resource
                 Forms\Components\Select::make('department_id')
                     ->label('부서명')
                     ->relationship(name: 'department', titleAttribute: 'name')
+                    ->required(),
+                Forms\Components\Select::make('grade_id')
+                    ->label('직급')
+                    ->relationship(name: 'grade', titleAttribute: 'name')
                     ->required(),
                 Forms\Components\TextInput::make('name')
                     ->label('이름')
@@ -75,6 +79,10 @@ class EmployeeResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('이름')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('grade.name')
+                    ->label('직급')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('휴대폰')
                     ->searchable(),
@@ -85,7 +93,12 @@ class EmployeeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('status')
                     ->label('상태')
-                    ->formatStateUsing(fn (int $state) => $state === 1 ? '재직' : ($state === 0 ? '퇴사' : '휴무'))
+                    ->badge()->color(fn (string $state): string => match($state) {
+                        '0' => 'danger',
+                        '1' => 'success',
+                        default => 'gray'
+                    })
+                    ->formatStateUsing(fn (int $state) => $state === 1 ? '재직' : ($state === 0 ? '퇴사' : ''))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_hired')
                     ->label('입사일')
@@ -109,8 +122,16 @@ class EmployeeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('보기'),
+                Tables\Actions\EditAction::make()
+                    ->label('수정'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('삭제')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('정말 삭제하시겠습니까?')
+                    ->modalDescription('이 작업은 되돌릴 수 없습니다. 계속 진행하시겠습니까?'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
