@@ -5,11 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DepartmentResource\Pages;
 use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
+use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -29,8 +32,13 @@ class DepartmentResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('부서명')
                     ->required()
                     ->maxLength(15),
+                Forms\Components\Select::make('employee_id')
+                    ->label('부서장')
+                    ->options(Employee::all()->pluck('name', 'id'))
+                    ->required()
             ]);
     }
 
@@ -42,6 +50,9 @@ class DepartmentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('부서명')
                     ->formatStateUsing(fn (string $state, Department $record) => "{$state} ({$record->employees_count})")
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('employee.name')
+                    ->label('부서장')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -63,6 +74,20 @@ class DepartmentResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('name')
+                    ->label('부서명'),
+                TextEntry::make('employee.name')
+                    ->label('부서장'),
+                TextEntry::make('employeesWithoutLeader.name')
+                    ->label('부서원')
+                    ->listWithLineBreaks()
             ]);
     }
 

@@ -146,12 +146,21 @@ class EmployeeResource extends Resource
             ->schema([
                 Section::make('직원 정보')
                     ->schema([
-                        TextEntry::make('department.name')->label('부서명'),
-                        TextEntry::make('name')->label('이름'),
-                        TextEntry::make('phone')->label('번호'),
-                        TextEntry::make('status')->label('상태')->formatStateUsing(fn (int $state) => $state === 1 ? '재직' : ($state === 0 ? '퇴사' : '휴무')),
-                        TextEntry::make('gender')->label('성별')->formatStateUsing(fn ($state) => $state === 'M' ? '남자' : ($state === 'W' ? '여자' : '')),
-                        TextEntry::make('date_hired')->label('입사일')->formatStateUsing(fn (string $state) => Carbon::parse($state)->translatedFormat('Y년 m월 d일')),
+                        TextEntry::make('department.name')
+                            ->label('부서명'),
+                        TextEntry::make('name')
+                            ->label('이름'),
+                        TextEntry::make('phone')
+                            ->label('번호'),
+                        TextEntry::make('status')
+                            ->label('상태')
+                            ->formatStateUsing(fn (int $state) => $state === 1 ? '재직' : ($state === 0 ? '퇴사' : '휴무')),
+                        TextEntry::make('gender')
+                            ->label('성별')
+                            ->formatStateUsing(fn (string $state) => $state === 'M' ? '남자' : ($state === 'W' ? '여자' : '')),
+                        TextEntry::make('date_hired')
+                            ->label('입사일')
+                            ->formatStateUsing(fn (string $state) => Carbon::parse($state)->translatedFormat('Y년 m월 d일')),
                     ])->columns(2)
             ]);
     }
